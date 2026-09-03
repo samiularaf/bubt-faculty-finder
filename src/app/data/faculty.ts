@@ -74,7 +74,7 @@ export const facultyList: Faculty[] = [
   { id: 62, name: "Syem Aziz", code: "SYZ", designation: "Lecturer in CSE", phone: "01979289175", email: "syemaziz@bubt.edu.bd", room: "1-602", dept: "CSE" },
   { id: 63, name: "Laila Binte Mustafiz", code: "LBM", designation: "Lecturer in CSE", phone: "01753015456", email: "laila@bubt.edu.bd", room: "3-407", dept: "CSE" },
   { id: 64, name: "Talimul Bari Shreshtho", code: "TABS", designation: "Lecturer in CSE", phone: "01722314456", email: "talimulbari@bubt.edu.bd", room: "3-508", dept: "CSE" },
-  { id: 65, name: "Rubaiya Reza Sohana", code: "RRSA", designation: "Lecturer in CSE", phone: "01777988261", email: "rubaiyarezasohana@bubt.edu.bd", room: "3-408", dept: "CSE" },
+  { id: 65, name: "Rubaiya Reza Sohana", code: "RRSA", designation: "Lecturer in CSE", phone: "01777988261", email: "rubaiyarezasohana@bubt.edu.bd", room: "1-602", dept: "CSE" },
   { id: 66, name: "Sudipa Saha", code: "SSD", designation: "Lecturer in CSE", phone: "01853443153", email: "sudipa.saha@bubt.edu.bd", room: "1-602", dept: "CSE" },
   { id: 67, name: "Sudipto Ghosh", code: "SG", designation: "Lecturer in CSE", phone: "01581413109", email: "sudiptoghosh@bubt.edu.bd", room: "3-503", dept: "CSE" },
   { id: 68, name: "Ashifur Rahman", code: "ASR", designation: "Lecturer in CSE", phone: "01925221970", email: "ashifurrahman@bubt.edu.bd", room: "3-502", dept: "CSE" },
