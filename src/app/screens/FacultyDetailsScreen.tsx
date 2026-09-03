@@ -2,9 +2,9 @@ import { useNavigate, useLocation, useParams } from "react-router";
 import { motion } from "motion/react";
 import {
   ArrowLeft, Phone, Mail, MapPin, Copy,
-  CheckCircle2, User, GraduationCap, Hash, Building2, PhoneCall
+  CheckCircle2, User, GraduationCap, Hash, Building2, PhoneCall, MessageSquare, Send, LoaderCircle
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getFacultyByCode, type Faculty } from "../data/faculty";
 import bubtLogo from "../../imports/bubt-logo-png_seeklogo-498306.png";
 
@@ -94,11 +94,78 @@ function InfoRow({
   );
 }
 
+type Feedback = {
+  id: number;
+  facultyCode: string;
+  comment: string;
+  reporterName: string | null;
+  createdAt: string;
+};
+
 export default function FacultyDetailsScreen() {
   const navigate = useNavigate();
   const location = useLocation();
   const { code } = useParams<{ code: string }>();
-  const faculty: Faculty = location.state?.faculty || getFacultyByCode(code || "");
+  const faculty: Faculty | undefined = location.state?.faculty || getFacultyByCode(code || "");
+  const facultyCode = faculty?.code || code || "";
+  const [feedback, setFeedback] = useState<Feedback[]>([]);
+  const [comment, setComment] = useState("");
+  const [reporterName, setReporterName] = useState("");
+  const [feedbackState, setFeedbackState] = useState<"loading" | "ready" | "error">("loading");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    const loadFeedback = async () => {
+      if (!facultyCode) return;
+      setFeedbackState("loading");
+
+      try {
+        const response = await fetch(`/api/feedback?facultyCode=${encodeURIComponent(facultyCode)}`);
+        if (!response.ok) throw new Error("Unable to load feedback.");
+        const data = await response.json();
+        if (active) {
+          setFeedback(data.feedback || []);
+          setFeedbackState("ready");
+        }
+      } catch {
+        if (active) setFeedbackState("error");
+      }
+    };
+
+    void loadFeedback();
+    return () => { active = false; };
+  }, [facultyCode]);
+
+  const submitFeedback = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!comment.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const response = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ facultyCode, comment, reporterName }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.error || "Unable to submit feedback.");
+
+      setFeedback(current => [data.feedback, ...current]);
+      setComment("");
+      setReporterName("");
+      setFeedbackState("ready");
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Unable to submit feedback.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   if (!faculty) {
     return (
@@ -319,6 +386,77 @@ export default function FacultyDetailsScreen() {
             <span style={{ color: "#1E3A8A", fontSize: 15, fontWeight: 700 }}>Send Email</span>
           </motion.a>
         </motion.div>
+
+        {/* Public feedback */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="rounded-2xl p-5 mb-4"
+          style={{ background: "#FFFFFF", border: "1px solid #E5E7EB", boxShadow: "0 4px 20px rgba(0,0,0,0.06)" }}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#EFF6FF" }}>
+              <MessageSquare size={18} style={{ color: "#1E3A8A" }} />
+            </div>
+            <div>
+              <h2 style={{ color: "#0F172A", fontSize: 16, fontWeight: 800 }}>Report incorrect information</h2>
+              <p style={{ color: "#64748B", fontSize: 12, marginTop: 2 }}>Your comment is published publicly for this faculty member.</p>
+            </div>
+          </div>
+
+          <form onSubmit={submitFeedback} className="mt-4 flex flex-col gap-3">
+            <input
+              value={reporterName}
+              onChange={event => setReporterName(event.target.value)}
+              maxLength={80}
+              placeholder="Your name (optional)"
+              className="w-full rounded-xl px-4 py-3 outline-none"
+              style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", color: "#0F172A", fontSize: 14 }}
+            />
+            <textarea
+              value={comment}
+              onChange={event => setComment(event.target.value)}
+              required
+              minLength={3}
+              maxLength={1000}
+              rows={4}
+              placeholder="For example: the room number or phone number above is incorrect..."
+              className="w-full resize-y rounded-xl px-4 py-3 outline-none"
+              style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", color: "#0F172A", fontSize: 14 }}
+            />
+            {submitError && <p style={{ color: "#DC2626", fontSize: 12 }}>{submitError}</p>}
+            <motion.button
+              type="submit"
+              disabled={isSubmitting || !comment.trim()}
+              whileTap={{ scale: 0.98 }}
+              className="self-start flex items-center gap-2 px-4 py-3 rounded-xl disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #1E3A8A, #2563EB)", color: "#FFFFFF", fontSize: 13, fontWeight: 700 }}
+            >
+              {isSubmitting ? <LoaderCircle size={16} className="animate-spin" /> : <Send size={16} />}
+              {isSubmitting ? "Posting..." : "Post public feedback"}
+            </motion.button>
+          </form>
+
+          <div className="mt-6">
+            <h3 style={{ color: "#334155", fontSize: 13, fontWeight: 800, letterSpacing: 0.4, textTransform: "uppercase" }}>Community feedback</h3>
+            {feedbackState === "loading" && <p className="mt-3" style={{ color: "#94A3B8", fontSize: 13 }}>Loading feedback...</p>}
+            {feedbackState === "error" && <p className="mt-3" style={{ color: "#DC2626", fontSize: 13 }}>Feedback is temporarily unavailable.</p>}
+            {feedbackState === "ready" && feedback.length === 0 && <p className="mt-3" style={{ color: "#94A3B8", fontSize: 13 }}>No feedback has been posted yet.</p>}
+            {feedback.length > 0 && (
+              <div className="mt-3 flex flex-col gap-3">
+                {feedback.map(item => (
+                  <div key={item.id} className="rounded-xl p-4" style={{ background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
+                    <p style={{ color: "#0F172A", fontSize: 14, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{item.comment}</p>
+                    <p className="mt-2" style={{ color: "#64748B", fontSize: 11 }}>
+                      {item.reporterName || "Anonymous"} · {new Date(item.createdAt + "Z").toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.section>
 
         {/* BUBT Footer badge */}
         <motion.div
