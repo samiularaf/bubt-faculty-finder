@@ -376,7 +376,7 @@ export default function FacultyDetailsScreen() {
             <div className="mt-3 flex flex-col gap-3">
               {feedback.map(item => (
                 <div key={item.id} className="rounded-xl p-3" style={{ background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
-                  <p style={{ color: "#0F172A", fontSize: 13, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{item.comment}</p>
+                  <p style={{ color: "#0F172A", fontSize: 13, fontWeight: 700, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{item.comment}</p>
                   <p className="mt-2" style={{ color: "#64748B", fontSize: 11 }}>
                     {item.reporterName || "Anonymous"} · {new Date(item.createdAt + "Z").toLocaleDateString()}
                   </p>
