@@ -350,87 +350,38 @@ export default function FacultyDetailsScreen() {
           </div>
         </motion.div>
 
-        {/* Compact community feedback */}
+        {/* Public comments */}
         <motion.section
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-2xl mb-3 overflow-hidden"
-          style={{ background: "#FFFFFF", border: "1px solid #BFDBFE", boxShadow: "0 4px 18px rgba(30,58,138,0.1)" }}
+          className="rounded-2xl p-4 mb-3"
+          style={{ background: "#FFFFFF", border: "1px solid #E2E8F0", boxShadow: "0 4px 18px rgba(30,58,138,0.07)" }}
         >
-          <button
-            type="button"
-            onClick={() => setFeedbackOpen(open => !open)}
-            className="w-full flex items-center gap-3 p-4 text-left"
-            aria-expanded={feedbackOpen}
-          >
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#EFF6FF" }}>
-              <MessageSquare size={18} style={{ color: "#1D4ED8" }} />
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#EFF6FF" }}>
+              <MessageSquare size={17} style={{ color: "#1D4ED8" }} />
             </div>
-            <div className="flex-1 min-w-0">
-              <p style={{ color: "#0F172A", fontSize: 14, fontWeight: 800 }}>Community feedback</p>
-              <p style={{ color: "#64748B", fontSize: 12, marginTop: 2 }}>
-                {feedback.length ? `${feedback.length} public comment${feedback.length === 1 ? "" : "s"}` : "Report incorrect information"}
+            <div>
+              <h2 style={{ color: "#0F172A", fontSize: 14, fontWeight: 800 }}>Public comments</h2>
+              <p style={{ color: "#64748B", fontSize: 12, marginTop: 1 }}>
+                {feedback.length ? `${feedback.length} community comment${feedback.length === 1 ? "" : "s"}` : "No community comments yet"}
               </p>
             </div>
-            <div className="px-3 py-1.5 rounded-lg flex-shrink-0" style={{ background: "#EFF6FF", color: "#1D4ED8", fontSize: 12, fontWeight: 700 }}>
-              {feedbackOpen ? "Close" : "Open"}
-            </div>
-          </button>
+          </div>
 
-          {feedbackOpen && (
-            <div className="px-4 pb-4 border-t" style={{ borderColor: "#DBEAFE" }}>
-              <form onSubmit={submitFeedback} className="mt-4 flex flex-col gap-3">
-                <input
-                  value={reporterName}
-                  onChange={event => setReporterName(event.target.value)}
-                  maxLength={80}
-                  placeholder="Your name (optional)"
-                  className="w-full rounded-xl px-4 py-3 outline-none"
-                  style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", color: "#0F172A", fontSize: 14 }}
-                />
-                <textarea
-                  value={comment}
-                  onChange={event => setComment(event.target.value)}
-                  required
-                  minLength={3}
-                  maxLength={1000}
-                  rows={3}
-                  placeholder="What information is incorrect?"
-                  className="w-full resize-y rounded-xl px-4 py-3 outline-none"
-                  style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", color: "#0F172A", fontSize: 14 }}
-                />
-                {submitError && <p style={{ color: "#DC2626", fontSize: 12 }}>{submitError}</p>}
-                <motion.button
-                  type="submit"
-                  disabled={isSubmitting || !comment.trim()}
-                  whileTap={{ scale: 0.98 }}
-                  className="self-start flex items-center gap-2 px-4 py-3 rounded-xl disabled:opacity-50"
-                  style={{ background: "linear-gradient(135deg, #1E3A8A, #2563EB)", color: "#FFFFFF", fontSize: 13, fontWeight: 700 }}
-                >
-                  {isSubmitting ? <LoaderCircle size={16} className="animate-spin" /> : <Send size={16} />}
-                  {isSubmitting ? "Posting..." : "Post public feedback"}
-                </motion.button>
-              </form>
-
-              <div className="mt-5">
-                <h3 style={{ color: "#334155", fontSize: 12, fontWeight: 800, letterSpacing: 0.4, textTransform: "uppercase" }}>Public comments</h3>
-                {feedbackState === "loading" && <p className="mt-3" style={{ color: "#94A3B8", fontSize: 13 }}>Loading feedback...</p>}
-                {feedbackState === "error" && <p className="mt-3" style={{ color: "#DC2626", fontSize: 13 }}>Feedback is temporarily unavailable.</p>}
-                {feedbackState === "ready" && feedback.length === 0 && <p className="mt-3" style={{ color: "#94A3B8", fontSize: 13 }}>No comments yet.</p>}
-                {feedback.length > 0 && (
-                  <div className="mt-3 flex flex-col gap-3">
-                    {feedback.map(item => (
-                      <div key={item.id} className="rounded-xl p-3" style={{ background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
-                        <p style={{ color: "#0F172A", fontSize: 13, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{item.comment}</p>
-                        <p className="mt-2" style={{ color: "#64748B", fontSize: 11 }}>
-                          {item.reporterName || "Anonymous"} · {new Date(item.createdAt + "Z").toLocaleDateString()}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+          {feedbackState === "loading" && <p className="mt-3" style={{ color: "#94A3B8", fontSize: 13 }}>Loading comments...</p>}
+          {feedbackState === "error" && <p className="mt-3" style={{ color: "#DC2626", fontSize: 13 }}>Comments are temporarily unavailable.</p>}
+          {feedbackState === "ready" && feedback.length > 0 && (
+            <div className="mt-3 flex flex-col gap-3">
+              {feedback.map(item => (
+                <div key={item.id} className="rounded-xl p-3" style={{ background: "#F8FAFC", border: "1px solid #E2E8F0" }}>
+                  <p style={{ color: "#0F172A", fontSize: 13, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{item.comment}</p>
+                  <p className="mt-2" style={{ color: "#64748B", fontSize: 11 }}>
+                    {item.reporterName || "Anonymous"} · {new Date(item.createdAt + "Z").toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
             </div>
           )}
         </motion.section>
@@ -472,6 +423,68 @@ export default function FacultyDetailsScreen() {
             <span style={{ color: "#1E3A8A", fontSize: 15, fontWeight: 700 }}>Send Email</span>
           </motion.a>
         </motion.div>
+
+        {/* Community feedback form */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35 }}
+          className="rounded-2xl mb-4 overflow-hidden"
+          style={{ background: "#FFFFFF", border: "1px solid #BFDBFE", boxShadow: "0 4px 18px rgba(30,58,138,0.1)" }}
+        >
+          <button
+            type="button"
+            onClick={() => setFeedbackOpen(open => !open)}
+            className="w-full flex items-center gap-3 p-4 text-left"
+            aria-expanded={feedbackOpen}
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#EFF6FF" }}>
+              <MessageSquare size={18} style={{ color: "#1D4ED8" }} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p style={{ color: "#0F172A", fontSize: 14, fontWeight: 800 }}>Community feedback</p>
+              <p style={{ color: "#64748B", fontSize: 12, marginTop: 2 }}>Report incorrect faculty information</p>
+            </div>
+            <div className="px-3 py-1.5 rounded-lg flex-shrink-0" style={{ background: "#EFF6FF", color: "#1D4ED8", fontSize: 12, fontWeight: 700 }}>
+              {feedbackOpen ? "Close" : "Write"}
+            </div>
+          </button>
+
+          {feedbackOpen && (
+            <form onSubmit={submitFeedback} className="px-4 pb-4 pt-4 border-t flex flex-col gap-3" style={{ borderColor: "#DBEAFE" }}>
+              <input
+                value={reporterName}
+                onChange={event => setReporterName(event.target.value)}
+                maxLength={80}
+                placeholder="Your name (optional)"
+                className="w-full rounded-xl px-4 py-3 outline-none"
+                style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", color: "#0F172A", fontSize: 14 }}
+              />
+              <textarea
+                value={comment}
+                onChange={event => setComment(event.target.value)}
+                required
+                minLength={3}
+                maxLength={1000}
+                rows={3}
+                placeholder="What information is incorrect?"
+                className="w-full resize-y rounded-xl px-4 py-3 outline-none"
+                style={{ background: "#F8FAFC", border: "1px solid #E2E8F0", color: "#0F172A", fontSize: 14 }}
+              />
+              {submitError && <p style={{ color: "#DC2626", fontSize: 12 }}>{submitError}</p>}
+              <motion.button
+                type="submit"
+                disabled={isSubmitting || !comment.trim()}
+                whileTap={{ scale: 0.98 }}
+                className="self-start flex items-center gap-2 px-4 py-3 rounded-xl disabled:opacity-50"
+                style={{ background: "linear-gradient(135deg, #1E3A8A, #2563EB)", color: "#FFFFFF", fontSize: 13, fontWeight: 700 }}
+              >
+                {isSubmitting ? <LoaderCircle size={16} className="animate-spin" /> : <Send size={16} />}
+                {isSubmitting ? "Posting..." : "Post public feedback"}
+              </motion.button>
+            </form>
+          )}
+        </motion.section>
 
         {/* BUBT Footer badge */}
         <motion.div
